@@ -1,39 +1,40 @@
 import os
 import time 
 
-print("-----------------------------------------")
-print("    MONITOR DE CONEXÃO DO THIAGO v1.0"    )
-print("-----------------------------------------")
+COR_POSITIVA = '\033[92m'
+COR_DE_ERRO = '\033[91m'
+COR_ESTAVEL = '\033[93m'
+RESET = '\033[0m'
 
-#Pergunta qual site queremos testar
-site = input("Qual site ou IP de jogo você quer testar? ")
+print(f"{COR_ESTAVEL}===MONITOR PERICIAL GAMER v3.0 ==={RESET}")
 
-print(f"Entendido! Vou verificar o estado de: {site}")
+site = input("Qual servidor vamos investigar hoje? ")
+HISTORICO = []
 
-# O comando para o terminal Linux(enviar 1 pacotinho de dados)
-comando = f"ping -c 1 {site}"
-
-# Agora o Python executa o comando e guarda a resposta
-status = os.system(comando)
-# O LOOP começa aqui! Tudo o que estiver 'empurado' paraa direita vai repetir
 try:
     while True:
-        comando = f"ping -c 1 {site}"
-        status = os.system(comando)
+        status = os.system(f"ping -c 1 {site} > /dev/null 2>&1")
+        horario = time.strftime("%D/%M/%Y %H:%M:%S")
 
-# Mostrando o verdedito
         if status == 0:
-            print(f"{site} Servidor Ativo!")
+            print(f"[{horario}] Status:{COR_POSITIVA} CONECTADO {RESET}")
+            HISTORICO.append(1)
         else:
-            print(f"ALERTA: O site {site} Servidor CAIU!")
-        # Isso cria ou abre o arquivoe escreve o resultado ládentro
-        with open("log_rede.txt", "a") as arquivo:
-            arquivo.write(f"Site:{site} - Status: {status} - Hora: {time.ctime()}\n")
+            print(f"[{horario}] Status :{COR_DE_ERRO} QUEDA DETECTADA!{RESET}\a")
+            HISTORICO.append(0)
 
-        print("Aguardando 10 segundos...(Ctrl + C para parar)")
-        time.sleep(10)    # Aqui o programa tira uma 'soneca' de 10 segundos
+        
+        SUCESSOS = sum(HISTORICO)
+        TOTAL = len(HISTORICO)
+        ESTABILIDADE = (SUCESSOS / TOTAL) * 100
 
+        print(f"Estabilidade Atual: {COR_ESTAVEL}{ESTABILIDADE:.1f}%{RESET}")
+        print("-" * 35)
+
+        time.sleep(5)
 except KeyboardInterrupt:
-    print("\nMonitoramento encerrado!")
+    print(f"\n{COR_ESTAVEL} Gerando relatório final...{RESET}")
+    print(f"Total de testes: {len(HISTORICO)}")
+    print(f"Taxa de sucesso: {(sum(HISTORICO)/len(HISTORICO))*100:.1f}%")
     
 
